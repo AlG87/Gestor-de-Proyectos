@@ -63,6 +63,7 @@ public class PaginaPrincipal extends javax.swing.JFrame {
         btCambiarContraseña = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setUndecorated(true);
 
         jTabbedPane1.setTabPlacement(javax.swing.JTabbedPane.LEFT);
 
