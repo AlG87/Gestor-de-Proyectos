@@ -5,6 +5,10 @@
 package proyecto;
 
 import java.awt.Color;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -13,7 +17,9 @@ import java.awt.Color;
 public class Login extends javax.swing.JFrame {
 
     int xposicion,yposicion;
-    
+    String idUsuario;
+    String nombreDeUsuario;
+    String contraseña;
     public Login() {
         initComponents();
     }
@@ -128,6 +134,11 @@ public class Login extends javax.swing.JFrame {
         Ingresar.setText("Entrar");
         Ingresar.setBorderPainted(false);
         Ingresar.setFocusPainted(false);
+        Ingresar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                IngresarActionPerformed(evt);
+            }
+        });
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel4.setText("Si no tiene una cuenta Registrese aqui");
@@ -246,9 +257,56 @@ public class Login extends javax.swing.JFrame {
        FrmBtsalida.setBackground(Color.gray);
     }//GEN-LAST:event_FrmBtsalidaMouseExited
 
+    private void IngresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IngresarActionPerformed
+        // TODO add your handling code here:
+        char[] contraseña = pfContraseña.getPassword();
+        if(TfNombreUsuario.getText().isEmpty() || contraseña.length == 0){
+            JOptionPane.showMessageDialog(null, "faltan campos por llenar");
+        }else{
+            validarUsuario();
+        }
+    }//GEN-LAST:event_IngresarActionPerformed
+
     /**
      * @param args the command line arguments
      */
+    private void validarUsuario(){
+        Conector coneccion = new Conector();
+        String nombreUsuario = TfNombreUsuario.getText();
+        String contra = new String(pfContraseña.getPassword());
+        try {
+            Connection con = coneccion.getConection();
+            
+            PreparedStatement ps;
+            ResultSet rs;
+            //treaer id del usuario si existe
+            ps = con.prepareStatement("select * from usuario where nombreusuario = ?");
+            ps.setString(1, nombreUsuario);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                idUsuario = rs.getString("idusuario");
+                nombreDeUsuario = rs.getString("nombreusuario");
+                contraseña = rs.getString("contraseña");
+                
+                if(contraseña.equals(contra)){
+                    PaginaPrincipal VentanaPrincipal = new PaginaPrincipal();
+                    VentanaPrincipal.setVisible(true);
+                    this.dispose();
+                }else{
+                    JOptionPane.showMessageDialog(null, "contraseña incorrecta");
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "el usuario no existe");
+                
+            }
+            //JOptionPane.showMessageDialog(null, rs.getInt("idusuario"));
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        
+        
+    }
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
