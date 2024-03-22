@@ -5,6 +5,13 @@
 package proyecto;
 
 import java.awt.Color;
+import java.awt.HeadlessException;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  *
@@ -16,8 +23,9 @@ public class Registro extends javax.swing.JFrame {
     
     public Registro() {
         initComponents();
+        
+        
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -140,7 +148,7 @@ public class Registro extends javax.swing.JFrame {
         jLabel4.setText("Repetir Contraseña");
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel6.setText("Correo");
+        jLabel6.setText(" Correo (opcional)");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -213,9 +221,14 @@ public class Registro extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void BtGuardarregistroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtGuardarregistroActionPerformed
-        Login VentanaLogin = new Login();
-        VentanaLogin.setVisible(true);
-        this.dispose();
+        char[] contraseña = PfContraseña.getPassword();
+        char[] repetirContraseña = pfRepContraseña.getPassword();
+        if(TfNombreUsuario.getText().isEmpty() || contraseña.length == 0 || repetirContraseña.length == 0){
+            JOptionPane.showMessageDialog(rootPane, "faltan campos por llenar");
+        }else{
+            crearUsuarioEnBD();
+        }
+        
     }//GEN-LAST:event_BtGuardarregistroActionPerformed
 
     private void jPanel2MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel2MousePressed
@@ -224,7 +237,6 @@ public class Registro extends javax.swing.JFrame {
     }//GEN-LAST:event_jPanel2MousePressed
 
     private void FrmBtsalidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_FrmBtsalidaMouseClicked
-
         System.exit(0);
     }//GEN-LAST:event_FrmBtsalidaMouseClicked
 
@@ -245,7 +257,51 @@ public class Registro extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
+    private void crearUsuarioEnBD(){
+        Conector con = new Conector();    // instancia de la clase conector
+        String correo = null;
+        if(!txtcorreo.getText().isEmpty() && verificarCorreo()) correo = txtcorreo.getText();
+        String contra = new String(PfContraseña.getPassword());
+        String contraRep = new String(pfRepContraseña.getPassword());
+        if(contra.equals(contraRep)){
+            if(verificarCorreo()){
+                try {
+                    Connection coneccion =  con.getConection();
+                    String nombreDeUsuario = TfNombreUsuario.getText();
+                    String contraseña = new String(PfContraseña.getPassword());
+                    CallableStatement call = coneccion.prepareCall("{call guardarUsuario(?,?,?)}");
+                    call.setString(1, nombreDeUsuario);                
+                    call.setString(2, contraseña);
+                    call.setString(3, correo);
+
+                    ResultSet respuesta = call.executeQuery();
+                    JOptionPane.showMessageDialog(null, "usuario registrado con exito");
+
+                    Login VentanaLogin = new Login(); //regresar a la ventana login
+                    VentanaLogin.setVisible(true);
+                    this.dispose();
+                
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e);
+                }
+            }else{
+                JOptionPane.showMessageDialog(null, "correo no valido");
+            }
+            
+        }else{
+            JOptionPane.showMessageDialog(null, "las contraseñas no son iguales");
+        }
+        
+        
+    }
     
+    private boolean verificarCorreo(){
+        String correo = txtcorreo.getText();
+        if(correo.contains("@") && correo.contains(".com")){
+            return true;
+        }
+        return false;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BtGuardarregistro;

@@ -9,9 +9,11 @@ import javax.swing.JOptionPane;
 
 public class Conector {
     
-    public static String URL = "jdbc:mysql://localhost:3306/proyectogestion?serverTimezone=UTC";
+    public static String URL = "jdbc:mysql://localhost:3306/proyectoGestor?serverTimezone=UTC";
     public static String USER = "root";
-    public static String PWRD = "2510";
+    public static String PWRD = "AlejoDev87";
+    
+    public Conector(){}
     
     public static Connection getConection(){
             
@@ -24,7 +26,7 @@ public class Conector {
             
         }catch(HeadlessException | ClassNotFoundException | SQLException e){
             
-            System.out.println(e);
+            JOptionPane.showMessageDialog(null, e);
         }
         
         return con;
